@@ -1,0 +1,2 @@
+COMP3012       	       	Computer Vision
+COMP4012       	Computer Mining
