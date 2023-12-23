@@ -38,6 +38,7 @@ void ModifyItemFullmark(int answewr3);
 void EditGrade(int answer4);
 void EditGradeChoice();
 void AddGrade(int answer4);
+void DeleteGrade();
 
 int CourseCount = 0;
 int CourseDetailsCount = 0;
@@ -653,3 +654,5 @@ void AddGrade(int answer4)
 	CountGradeNum++;
 	SaveGrade();
 }
+
+
