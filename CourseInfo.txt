@@ -1,3 +1,1 @@
-COMP3012	Advanced Computer Vision
-COMP4012	Computer Mining
-COMP7012	Computer Learning and Application
+COMP3012	Computer Vision
