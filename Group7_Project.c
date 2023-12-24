@@ -12,6 +12,8 @@ struct Course
 	float grade[100];
 	float evaluation_percentage;
 	float evaluation_fullmark;
+	float lowest_final;
+	char danger_sign;
 };
 struct Course course[100];
 
@@ -19,20 +21,20 @@ struct Grade
 {
 	int numGrade;
 	float ActualGrade;
-}
+};
 struct Grade GradeRecord[100];
 
 void SaveCourse();
 void ReadCourse();
 void SaveCourseDetails();
 void ReadCourseDetails();
-void SaveGrade(int answer4, int answer5, int CountNum);
-void ReadGrade(int answer4, int answer5);
+void SaveGrade();
 int CheckCourseCode();
 int CheckCourseName();
 void test();
 void AddCourse();
 void DeleteCourse();
+int DelCourse(int answer2);
 int DelCourse(int answer2);
 void DeleteAllCourse();
 void DeleteAllCourseDetails();
@@ -48,14 +50,21 @@ void DeleteAllGrades();
 void ModifyGrade();
 void SingleCourseDetail(int choice3,int classchoose);
 void EditGrade();
-
+int expected2(int expect, float assignments, int labs, float in_class_exercises, float projects, float final);
+int expected3(int expect, float assignments, int labs, float in_class_exercises, float projects, float final, float percentage);
+int expected4();
 
 int CourseCount = 0;
 int CourseDetailsCount = 0;
-int count=0;//Caculate Grade Number
-int choice2;//special choice
-int choice3;//special choice
-
+int count = 0;
+int choice2;
+int choice3;
+int expect;
+float assignments; 
+float in_class_exercises; 
+float projects; 
+float final;
+float percentage;
 
 int main()
 {
@@ -80,9 +89,10 @@ int main()
 			EditCourse();
 			break;
 		case 2: // Edit Grade
-		    EditGradeChoice();
+		    EditGrade();
 			break;
 		case 3: // Expected Final Grade
+		    expected4();
 			break;
 		case 4: // View Course
 			break;
@@ -122,23 +132,21 @@ void SaveCourseDetails()
 	RCD = NULL;
 }
 
-void SaveGrade(int answer4, int answer5, int CountNum)
+void SaveGrade()
 {
-	FILE* RG = NULL;
-	RG = fopen("./CourseGrade.txt", "w+");
-	int i = 0;
-	CountGradeNum = 3 * answer4 + answer5 - 4;
-	char ch = '\n';
-	for (i = 0; i < CountGradeNum + 1; i++)
+	FILE* fpgrade = NULL;
+	fpgrade = fopen("CourseGrade.txt","r+");
+	if (fpgrade==NULL)
 	{
-		for (int m = 0; m < CountNum; m++)
-		{
-			fprintf(RG, "%.2f\t", course[i].grade[m]);
-	    }
-		fprintf(RG, "%c", ch);
+		printf("Error opening file for writing!");
+		return;
 	}
-	fclose(RG);
-	RG = NULL;
+	for (int i = 0; i < count; i++)
+	{
+		fprintf(fpgrade,"%d : %.2f ",GradeRecord[i].numGrade,GradeRecord[i].ActualGrade);
+	}
+	fclose(fpgrade);
+	fpgrade = NULL;
 }
 
 void ReadCourse()
@@ -167,26 +175,6 @@ void ReadCourseDetails()
 	CourseDetailsCount = i;
 	fclose(RCD);
 	RCD = NULL;
-}
-
-void ReadGrade(int answer4, int answer5)
-{
-	FILE* RG = NULL;
-	RG = fopen("./CourseGrade.txt", "r");
-	CountGradeNum = 3 * answer4 + answer5 - 4;
-	int i = 0;
-	int m = 0;
-	while(fscanf(RG, "%f", &course[i].grade) != EOF)
-	{
-		while(fscanf(RG, "%f", &course[i].grade[m]) != EOF)
-		{
-			m++;
-		}
-		i++;
-	}
-	CountNum = m;
-	fclose(RG);
-	RG = NULL;
 }
 
 int CheckCourseCode(char* code)
@@ -295,7 +283,7 @@ void DeleteCourse()
 	{
 		printf("%d.\t%s\t%s\n\n\n", n + 1, course[n].code, course[n].name);
 	}
-	printf("Enter a number to delete the related course or any other key back: ");
+	printf("Enter a number to delete the related course or any other number back: ");
 	int answer2;
 	scanf("%d", &answer2);
 	if (answer2 < 1 || answer2 > CourseCount)
@@ -304,10 +292,18 @@ void DeleteCourse()
 	}
 	else
 	{
-		int res = DelCourse(answer2);
+		int res_1 = DelCourse(answer2);
+		int res_2 = DelCourseDetails(answer2);
 	} 
 	SaveCourse();
 	SaveCourseDetails();
+	ReadCourse();
+	printf("\nThere're totally %d courses recorded:\n\n", CourseCount);
+	for (int n = 0; n < CourseCount; n++)
+	{
+		printf("%d.\t%s\t%s\n\n\n", n + 1, course[n].code, course[n].name);
+	}
+	printf("Enter a number to delete the related course or any other number back: ");
 }
 
 int DelCourse(int answer2)
@@ -317,9 +313,30 @@ int DelCourse(int answer2)
 		int i;
 		for (i = answer2; i <= CourseCount - 1; i++)
 		{
-			course[i - 1] = course[i];
+			course[i - 1].name == course[i].name;
+			course[i - 1].code == course[i].code;
 		}
 		CourseCount--;
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int DelCourseDetails(int answer2)
+{
+	if (answer2 = 0 && answer2 <= CourseCount)
+	{
+		int i;
+		for (i = 3 * (answer2 - 1); i < 3 * answer2; i++)
+		{
+			course[i - 1].evaluation_name == course[i + 2].evaluation_name;
+			course[i - 1].evaluation_percentage == course[i + 2].evaluation_percentage;
+			course[i - 1].evaluation_fullmark == course[i + 2].evaluation_fullmark;
+		}
+		CourseDetailsCount -= 3;
 		return 1;
 	}
 	else
@@ -388,7 +405,7 @@ void ModifyCourseChoice()
 			      printf("        | %d      | %-20s| %-15f| %-15f        \n", i - 3 * (n - 1) + 1, course[i].evaluation_name, course[i].evaluation_percentage, course[i].evaluation_fullmark);
 			   }  
 			   printf("        -----------------------------------\n");
-			   ModifyCourseChoice(answer3);
+			   ModifyCourse(answer3);
 		   }		
 	    }
 	}
@@ -578,193 +595,158 @@ void EditCourse()
 }
 
 void AddGrade(){
-    while(1){
+    while(1)
+	{
 	    printf("Enter a grade to added to the item or a negative number back: ");
-		if (scanf("%f",&GradeRecord[count].ActualGrade)==1)
+		if (scanf("%f", &GradeRecord[count].ActualGrade)==1)
 		{
-			if (GradeRecord[count].ActualGrade<0)
+			if (GradeRecord[count].ActualGrade < 0)
 			{
 				break;
 			}
-			GradeRecord[count].numGrade=count+1;
+			GradeRecord[count].numGrade = count + 1;
 			count++;
-	}
-}
-	//put the information of the grade into a file
-	FILE *fpgrade;
-	fpgrade=fopen("Gradeinformation.txt","r+");
-	if (fpgrade==NULL)
-	{
-		printf("Error opening file for writing!");
-		return;
-	}
-	
+	    }
+    }
+    SaveGrade();
+	SingleCourseDetail(choice3, choice2);
 	for (int i = 0; i < count; i++)
 	{
-		fprintf(fpgrade,"%d : %.2f ",GradeRecord[i].numGrade,GradeRecord[i].ActualGrade);
+		printf(" %d: %.2f", GradeRecord[i].numGrade, GradeRecord[i].ActualGrade);
 	}
-	fclose(fpgrade);
-
-	//print the information after being editted
-		SingleCourseDetail(choice3,choice2);
-		for (int i = 0; i < count; i++)
-		{
-			printf(" %d: %.2f",GradeRecord[i].numGrade,GradeRecord[i].ActualGrade);
-		}
-		printf("\n        -----------------------------------\n");
+	printf("\n        -----------------------------------\n");
 
 }
 
-void DeleteGrade(){//这里留一个指针用于把对应课程的不同部分文件分开存 待接入singlecourse函数里
+void DeleteGrade()
+{
 	int choice5;
 	printf("Enter the number of a grade to delete or any other key back: ");
-	if (scanf("%d",&choice5)!=1)
+	if (scanf("%d", &choice5) != 1)
 	{
-		return;//用户输入非整数，返回
+		return;
 	}
-	if (choice5>0&&choice5<=count)
+	if (choice5 > 0 && choice5 <= count)
 	{
-		for (int i = choice5-1; i < count-1; i++)
+		for (int i = choice5 - 1; i < count - 1; i++)
 		{
-			GradeRecord[i]=GradeRecord[i+1];
+			GradeRecord[i] = GradeRecord[i + 1];
 		}
-		count--;//更新总成绩数
-
-		FILE *fpgrade;
-		fpgrade=fopen("Gradeinformation.txt","r+");
-		if (fpgrade==NULL)
-		{
-			printf("Error opening file for writing!\n");
-			return;
-		}
-		for (int i = 0; i < count; i++)
-		{
-			fprintf(fpgrade,"%d: %.2f",GradeRecord[i].numGrade,GradeRecord[i].ActualGrade);
-		}
-		fclose(fpgrade);//更新文件中的成绩
+		count--;
+        SaveGrade();
 		
 	}
-		SingleCourseDetail(choice3,choice2);
-		for (int i = 0; i < count; i++) {
+		SingleCourseDetail(choice3, choice2);
+		for (int i = 0; i < count; i++) 
+		{
             printf(" %d: %.2f", GradeRecord[i].numGrade, GradeRecord[i].ActualGrade);
         }
 		printf("\n        -----------------------------------\n");
  
 } 
 
-void DeleteAllGrades() {
-    FILE* ff = fopen("Gradeinformation.txt", "w");
+void DeleteAllGrades() 
+{
+    FILE* ff = fopen("CourseGrade.txt", "w");
     fclose(ff);
-
-    count = 0; // 重置成绩数量为0
-
+    count = 0;
     SingleCourseDetail(choice3, choice2);
-
-    // 输出被删除后的信息
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++) 
+	{
         printf(" %d: %.2f", GradeRecord[i].numGrade, GradeRecord[i].ActualGrade);
     }
     printf("\n        -----------------------------------\n");
 }
 
-
-
-void ModifyGrade() {
+void ModifyGrade() 
+{
     SingleCourseDetail(choice3, choice2);
-    
     printf("\n============== Edit Grade ==============\n");
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++) 
+	{
         printf(" %d: %.2f", GradeRecord[i].numGrade, GradeRecord[i].ActualGrade);
     }
     printf("\n        -----------------------------------\n");
-    
     printf("Enter the number of a grade to modify or any other key back: ");
     int choice6;
     scanf("%d", &choice6);
-    
     int found = 0;
-    for (int i = 0; i < count; i++) {
-        if (choice6 == GradeRecord[i].numGrade) {
+    for (int i = 0; i < count; i++) 
+	{
+        if (choice6 == GradeRecord[i].numGrade) 
+		{
             printf("You want to change Assignment Grade %d from %.2f to: ", GradeRecord[i].numGrade, GradeRecord[i].ActualGrade);
             scanf("%f", &GradeRecord[i].ActualGrade);
             found = 1;
             break;
         }
     }
-
-    if (!found) {
+    if (!found) 
+	{
         printf("Grade not found.\n");
     }
-
-    // 写入文件
     FILE* newGradefp;
-    newGradefp = fopen("Gradeinformation.txt", "w");
-    if (newGradefp == NULL) {
+    newGradefp = fopen("CourseGrade.txt", "w");
+    if (newGradefp == NULL) 
+	{
         printf("Error opening file for writing!\n");
         return;
     }
-
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++) 
+	{
         fprintf(newGradefp, "%d: %.2f", GradeRecord[i].numGrade, GradeRecord[i].ActualGrade);
     }
-    fclose(newGradefp); // 更新文件中的成绩
-
+    fclose(newGradefp);
     SingleCourseDetail(choice3, choice2);
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++) 
+	{
         printf(" %d: %.2f", GradeRecord[i].numGrade, GradeRecord[i].ActualGrade);
     }
     printf("\n        -----------------------------------\n");
 }
 
-
-
-void SingleCourseDetail(int choice3,int classchoose){
-	
+void SingleCourseDetail(int choice3,int classchoose)
+{
 	for (int n = 1; n <= CourseCount; n++)
 	{
 		if (classchoose == n)
 		{
 			if (choice3==1)
-	{
-		printf("        %s%s\n", course[n - 1].code, course[n - 1].name);
-		printf("        -----------------------------------\n");
-		printf("        | No.    | Item                | Percentage     | Full Mark    | Grades\n");
-		printf("        | 1      | %-20s| %-15f| %-15f |", course[n-1].evaluation_name, course[n-1].evaluation_percentage, course[n-1].evaluation_fullmark);
+	        {
+		        printf("        %s%s\n", course[n - 1].code, course[n - 1].name);
+		        printf("        -----------------------------------\n");
+		        printf("        | No.    | Item                | Percentage     | Full Mark    | Grades\n");
+		        printf("        | 1      | %-20s| %-15f| %-15f |", course[n-1].evaluation_name, course[n-1].evaluation_percentage, course[n-1].evaluation_fullmark);
+	        }
+	        else if (choice3==2)
+	        {
+		        printf("        %s%s\n", course[n - 1].code, course[n - 1].name);
+		        printf("        -----------------------------------\n");
+		        printf("        | No.    | Item                | Percentage     | Full Mark    | Grades\n");
+		        printf("        | 2      | %-20s| %-15f| %-15f |", course[n].evaluation_name, course[n].evaluation_percentage, course[n].evaluation_fullmark);
+	        }
+			else if (choice3==3)
+	        {
+		        printf("        %s%s\n", course[n - 1].code,course[n - 1].name);
+		        printf("        -----------------------------------\n");
+		        printf("        | No.    | Item                | Percentage     | Full Mark    | Grades\n");
+		        printf("        | 3      | %-20s| %-15f| %-15f |", course[n+1].evaluation_name, course[n+1].evaluation_percentage, course[n+1].evaluation_fullmark);
 		
-	}else if (choice3==2)
-	{
-		printf("        %s%s\n", course[n - 1].code, course[n - 1].name);
-		printf("        -----------------------------------\n");
-		printf("        | No.    | Item                | Percentage     | Full Mark    | Grades\n");
-		printf("        | 2      | %-20s| %-15f| %-15f |", course[n].evaluation_name, course[n].evaluation_percentage, course[n].evaluation_fullmark);
-		
-	}else if (choice3==3)
-	{
-		printf("        %s%s\n", course[n - 1].code,course[n - 1].name);
-		printf("        -----------------------------------\n");
-		printf("        | No.    | Item                | Percentage     | Full Mark    | Grades\n");
-		printf("        | 3      | %-20s| %-15f| %-15f |", course[n+1].evaluation_name, course[n+1].evaluation_percentage, course[n+1].evaluation_fullmark);
-		
-	}else
-	{
-		return;
-	}
-	
-
-
-			//printf("        %s%s\n", course[n - 1].code, course[n - 1].name);
+	        }
+			else
+	        {
+		        return;
+	        }
 		}
 	}
-	
 	printf("\n");
 }
 
-void EditGrade(){
+void EditGrade()
+{
 	printf("\nThere're totally %d courses recorded:\n\n", CourseCount);
 	test();
 	printf("Enter a number to edit the related course grades or any other key back:");
-	
-	//print the course information
 	scanf("%d", &choice2);
 	for (int n = 1; n <= CourseCount; n++)
 	{
@@ -778,27 +760,26 @@ void EditGrade(){
 			{
 				printf("        | %d      | %-20s| %-15f| %-15f        \n", i - 3 * (n - 1) + 1, course[i].evaluation_name, course[i].evaluation_percentage, course[i].evaluation_fullmark);
 			}
-			FILE *fpgrade;
-			fpgrade=fopen("Gradeinformation.txt","r");
-			if (fpgrade!=NULL)//有点疑问 不知道打印空的结构体会不会造成bug
+			FILE* fpgrade;
+			fpgrade = fopen("CourseGrade.txt","r");
+			if (fpgrade != NULL)
 			{
 				for (int i = 0; i < count; i++)
-			{
-			printf(" %d: %.2f",GradeRecord[i].numGrade,GradeRecord[i].ActualGrade);
+			    {
+			        printf(" %d: %.2f", GradeRecord[i].numGrade, GradeRecord[i].ActualGrade);
+			    }
+			    printf("\n        -----------------------------------\n");
 			}
-			printf("\n        -----------------------------------\n");
-	
-			}else{
-			printf("\n        -----------------------------------\n");
+			else
+			{
+			    printf("\n        -----------------------------------\n");
 			}
 		}		
 	}
-	
 	printf("Enter the No. of an Item whose grades to be edited or any other key back: ");
-	scanf("%d",&choice3);
-	SingleCourseDetail(choice3,choice2);
+	scanf("%d", &choice3);
+	SingleCourseDetail(choice3, choice2);
 	printf("\n        -----------------------------------\n");
-
 	while (1)
 	{
 		printf("\n============== Edit Grade ==============\n");
@@ -833,5 +814,82 @@ void EditGrade(){
 			break;
 		}
 	}
+}
 
+int expected2(int expect, float assignments, int labs, float in_class_exercises, float projects, float final)
+{
+	printf("Enter an expected course total([0, 100]) or any negative back: ");
+	scanf("%d", &expect);
+	printf("\t|\t(*)Danger\t|\tCourse Code\t|\tCourse Name\t|\tLowest Final for Expected Course Total\t|\n");
+	final = (expect - (0.1*assignments) - (0.2*labs) - (0.2*in_class_exercises) - (0.1*projects))/0.4;
+	if(final>100)
+		course->danger_sign = '*';
+	else
+		course->danger_sign = ' ';
+	for(int i = 0; i < count; i++)
+	{
+		printf("\t|\tcourse.danger_sign\t|\tcourse.code\t|\tcourse.name\t|\tcourse.lowest_final\t|\n");
+	}
+}
+
+int expected3(int expect, float assignments, int labs, float in_class_exercises, float projects, float final, float percentage)//view single course列表
+{
+	int op3, find;
+	char danger_sign1;
+	printf("There're totally 4 courses recorded:\n\n");
+	for(int i=0; i < count; i++)
+	{
+		printf("%d.\t%s\t%s\n", i, course->code, course->name);
+    }
+	printf("Enter a number to select one course or any other key back: ");
+	scanf("%d", &find);
+	printf("Enter an expected course total([0, 100]) or any negative back: ");
+	scanf("%d", &expect);
+	final = (expect - (0.1*assignments) - (0.2*labs) - (0.2*in_class_exercises) - (0.1*projects))/0.4;
+	if(final>=60&&final<=100)
+	{
+		danger_sign1=' ';
+	}
+	else
+	{
+		danger_sign1='*';
+	}
+	printf("\tCOMP1003 Database Management Systems\n");
+	printf("\t-----------------------------------\n");
+	printf("\t|\tNo.\t|\tItem \t|\tPercentage\t|\tOriginal Average\t|\tItem Grade\t|");
+	printf("\t|\t1\t|\tAssignment\t|\t60.00\t|\t8.21\t|\tassignments*0.6\t|");
+	printf("\t-----------------------------------\n\n");
+	printf("\t|\tNo.\t|\tItem\t|\tPercentage\t|\tFullmark\t|\tExpected Grade\t|\n");
+	printf("\t|\tdanger_sign1 2\t|\tFinal\t|\t40.00\t|\t100.00\t|\tfinal\t|\n");
+	printf("\t-----------------------------------\n");
+	if(final<60||final>100)
+	{
+		printf("ATTENTION: The final score should pass a certain threshold to pass the course!\n");
+	}
+}
+
+int expected4()//3子菜单
+{
+	printf("============== Calculate Expected Final ==============\n");
+	printf("\t1. View All Courses\n");
+	printf("\t2. View Single Course\n");
+	printf("\t3. Back\n");
+	printf("=======================================================\n");
+	printf("\n");
+    printf("Enter a number to choose an operation: ");
+    int op2 = 0;
+	scanf("%d", &op2);
+    if(op2==3)
+	{
+		main();
+	}
+	else if(op2==1)
+	{
+		expected2(expect, assignments, labs, in_class_exercises, projects, final);
+	}	
+	else if(op2==2)
+	{
+		expected3(expect, assignments, labs, in_class_exercises, projects, final, percentage);
+	}
+    return 0;
 }
