@@ -17,6 +17,13 @@ struct Course
 };
 struct Course course[100];
 
+struct Details
+{
+	char evaluation_name[100];
+	float evaluation_percentage;
+	float evaluation_fullmark;
+};
+struct Details details[100];
 struct Grade
 {
 	int numGrade;
@@ -53,6 +60,7 @@ void EditGrade();
 int expected2(int expect, float assignments, int labs, float in_class_exercises, float projects, float final);
 int expected3(int expect, float assignments, int labs, float in_class_exercises, float projects, float final, float percentage);
 int expected4();
+void ViewCourse();
 
 int CourseCount = 0;
 int CourseDetailsCount = 0;
@@ -95,6 +103,7 @@ int main()
 		    expected4();
 			break;
 		case 4: // View Course
+			ViewCourse();
 			break;
 		case 5: // Exit
 			return 1;
@@ -126,7 +135,7 @@ void SaveCourseDetails()
 	int i = 0;
 	for (i = 0; i < CourseDetailsCount; i++)
 	{
-		fprintf(RCD, "%s\t%f\t%f\n", course[i].evaluation_name, course[i].evaluation_percentage, course[i].evaluation_fullmark);
+		fprintf(RCD, "%s\t%f\t%f\n", details[i].evaluation_name, details[i].evaluation_percentage, details[i].evaluation_fullmark);
 	}
 	fclose(RCD);
 	RCD = NULL;
@@ -168,7 +177,7 @@ void ReadCourseDetails()
 	FILE* RCD = NULL;
 	RCD = fopen("./CourseDetailsInfo.txt", "r");
 	int i = 0;
-	while (fscanf(RCD, "%s%f%f", course[i].evaluation_name, &course[i].evaluation_percentage, &course[i].evaluation_fullmark) != EOF)
+	while (fscanf(RCD, "%s%f%f", details[i].evaluation_name, &details[i].evaluation_percentage, &details[i].evaluation_fullmark) != EOF)
 	{
 		i++;
 	}
@@ -261,7 +270,7 @@ void AddCourse()
 		int has_space = 0;
 		for (i = CourseDetailsCount; i < CourseDetailsCount + num; i++)
 		{
-			scanf("%s %f %f", course[i].evaluation_name, &course[i].evaluation_percentage, &course[i].evaluation_fullmark);
+			scanf("%s %f %f", details[i].evaluation_name, &details[i].evaluation_percentage, &details[i].evaluation_fullmark);
 		}
 		CourseDetailsCount += 3;
 		int Item = CourseDetailsCount;
@@ -313,8 +322,7 @@ int DelCourse(int answer2)
 		int i;
 		for (i = answer2; i <= CourseCount - 1; i++)
 		{
-			course[i - 1].name == course[i].name;
-			course[i - 1].code == course[i].code;
+			course[i - 1] = course[i];
 		}
 		CourseCount--;
 		return 1;
@@ -332,9 +340,7 @@ int DelCourseDetails(int answer2)
 		int i;
 		for (i = 3 * (answer2 - 1); i < 3 * answer2; i++)
 		{
-			course[i - 1].evaluation_name == course[i + 2].evaluation_name;
-			course[i - 1].evaluation_percentage == course[i + 2].evaluation_percentage;
-			course[i - 1].evaluation_fullmark == course[i + 2].evaluation_fullmark;
+			details[i - 1] = details[i + 2];
 		}
 		CourseDetailsCount -= 3;
 		return 1;
@@ -402,7 +408,7 @@ void ModifyCourseChoice()
 			   int i = 0;
 			   for (i = 3 * (n - 1); i < 3 * n; i++)
 			   {
-			      printf("        | %d      | %-20s| %-15f| %-15f        \n", i - 3 * (n - 1) + 1, course[i].evaluation_name, course[i].evaluation_percentage, course[i].evaluation_fullmark);
+			      printf("        | %d      | %-20s| %-15f| %-15f        \n", i - 3 * (n - 1) + 1, details[i].evaluation_name, details[i].evaluation_percentage, details[i].evaluation_fullmark);
 			   }  
 			   printf("        -----------------------------------\n");
 			   ModifyCourse(answer3);
@@ -462,7 +468,7 @@ void ModifyCourseName(int answer3)
 	int i = 0;
 	for (i = 3 * (answer3 - 1); i < 3 * answer3; i++)
 	{
-		printf("        | %d      | %-20s| %-15f| %-15f        \n", i - 3 * (answer3 - 1) + 1, course[i].evaluation_name, course[i].evaluation_percentage, course[i].evaluation_fullmark);
+		printf("        | %d      | %-20s| %-15f| %-15f        \n", i - 3 * (answer3 - 1) + 1, details[i].evaluation_name, details[i].evaluation_percentage, details[i].evaluation_fullmark);
 	}
 	printf("        -----------------------------------\n");   
 }
@@ -480,12 +486,12 @@ void ModifyItemName(int answer3)
 		scanf("%d", &num);
 	}
 	printf("Enter a new name:");
-	scanf("%*c%[^\n]", course[3 * answer3 + num - 4].evaluation_name);
+	scanf("%*c%[^\n]", details[3 * answer3 + num - 4].evaluation_name);
 	int has_space = 0;
 	int m = 0;
-	for (m = 0; course[3 * answer3 + num - 4].evaluation_name[m]; m++)
+	for (m = 0; details[3 * answer3 + num - 4].evaluation_name[m]; m++)
 	{
-		if (isspace(course[3 * answer3 + num - 4].evaluation_name[m]))
+		if (isspace(details[3 * answer3 + num - 4].evaluation_name[m]))
 	    {
 		    has_space = 1;
 	    }
@@ -503,7 +509,7 @@ void ModifyItemName(int answer3)
 	int i = 0;
 	for (i = 3 * (answer3 - 1); i < 3 * answer3; i++)
 	{
-		printf("        | %d      | %-20s| %-15f| %-15f        \n", i - 3 * (answer3 - 1) + 1, course[i].evaluation_name, course[i].evaluation_percentage, course[i].evaluation_fullmark);
+		printf("        | %d      | %-20s| %-15f| %-15f        \n", i - 3 * (answer3 - 1) + 1, details[i].evaluation_name, details[i].evaluation_percentage, details[i].evaluation_fullmark);
 	}
 	printf("        -----------------------------------\n");  
 }
@@ -514,7 +520,7 @@ void ModifyItemPercentage(int answer3)
 	int n = 0;
 	for (n = 3 * (answer3 - 1); n < 3 * answer3; n++)
 	{
-		scanf("%f", &course[n].evaluation_percentage);
+		scanf("%f", &details[n].evaluation_percentage);
 	}
     SaveCourseDetails();
 	printf("\n");
@@ -524,7 +530,7 @@ void ModifyItemPercentage(int answer3)
 	int i = 0;
 	for (i = 3 * (answer3 - 1); i < 3 * answer3; i++)
 	{
-		printf("        | %d      | %-20s| %-15f| %-15f        \n", i - 3 * (answer3 - 1) + 1, course[i].evaluation_name, course[i].evaluation_percentage, course[i].evaluation_fullmark);
+		printf("        | %d      | %-20s| %-15f| %-15f        \n", i - 3 * (answer3 - 1) + 1, details[i].evaluation_name, details[i].evaluation_percentage, details[i].evaluation_fullmark);
 	}
 	printf("        -----------------------------------\n");  
 }
@@ -541,7 +547,7 @@ void ModifyItemFullmark(int answer3)
 		scanf("%d", &num);
 	}
     printf("Enter a new fullmark:");
-	scanf("%f", &course[3 * answer3 + num - 4].evaluation_fullmark);
+	scanf("%f", &details[3 * answer3 + num - 4].evaluation_fullmark);
 	SaveCourseDetails();
 	printf("\n");
 	printf("        %s %s\n", course[answer3 - 1].code, course[answer3 - 1].name);
@@ -550,7 +556,7 @@ void ModifyItemFullmark(int answer3)
 	int i = 0;
 	for (i = 3 * (answer3 - 1); i < 3 * answer3; i++)
 	{
-		printf("        | %d      | %-20s| %-15f| %-15f        \n", i - 3 * (answer3 - 1) + 1, course[i].evaluation_name, course[i].evaluation_percentage, course[i].evaluation_fullmark);
+		printf("        | %d      | %-20s| %-15f| %-15f        \n", i - 3 * (answer3 - 1) + 1, details[i].evaluation_name, details[i].evaluation_percentage, details[i].evaluation_fullmark);
 	}
 	printf("        -----------------------------------\n");   
 }
@@ -584,6 +590,7 @@ void EditCourse()
 		case 3: // Delete All Courses
 			DeleteAllCourse();
 			DeleteAllCourseDetails();
+			DeleteAllGrades() ;
 			break;
 		case 4: // Modify Course
 			ModifyCourseChoice();
@@ -656,6 +663,7 @@ void DeleteAllGrades()
         printf(" %d: %.2f", GradeRecord[i].numGrade, GradeRecord[i].ActualGrade);
     }
     printf("\n        -----------------------------------\n");
+	SaveGrade();
 }
 
 void ModifyGrade() 
@@ -716,21 +724,21 @@ void SingleCourseDetail(int choice3,int classchoose)
 		        printf("        %s%s\n", course[n - 1].code, course[n - 1].name);
 		        printf("        -----------------------------------\n");
 		        printf("        | No.    | Item                | Percentage     | Full Mark    | Grades\n");
-		        printf("        | 1      | %-20s| %-15f| %-15f |", course[n-1].evaluation_name, course[n-1].evaluation_percentage, course[n-1].evaluation_fullmark);
+		        printf("        | 1      | %-20s| %-15f| %-15f |", details[n-1].evaluation_name, details[n-1].evaluation_percentage, details[n-1].evaluation_fullmark);
 	        }
 	        else if (choice3==2)
 	        {
 		        printf("        %s%s\n", course[n - 1].code, course[n - 1].name);
 		        printf("        -----------------------------------\n");
 		        printf("        | No.    | Item                | Percentage     | Full Mark    | Grades\n");
-		        printf("        | 2      | %-20s| %-15f| %-15f |", course[n].evaluation_name, course[n].evaluation_percentage, course[n].evaluation_fullmark);
+		        printf("        | 2      | %-20s| %-15f| %-15f |", details[n].evaluation_name, details[n].evaluation_percentage, details[n].evaluation_fullmark);
 	        }
 			else if (choice3==3)
 	        {
 		        printf("        %s%s\n", course[n - 1].code,course[n - 1].name);
 		        printf("        -----------------------------------\n");
 		        printf("        | No.    | Item                | Percentage     | Full Mark    | Grades\n");
-		        printf("        | 3      | %-20s| %-15f| %-15f |", course[n+1].evaluation_name, course[n+1].evaluation_percentage, course[n+1].evaluation_fullmark);
+		        printf("        | 3      | %-20s| %-15f| %-15f |", details[n+1].evaluation_name, details[n+1].evaluation_percentage, details[n+1].evaluation_fullmark);
 		
 	        }
 			else
@@ -758,7 +766,7 @@ void EditGrade()
 			int i = 0;
 			for (i = 3 * (n - 1); i < 3 * n; i++)
 			{
-				printf("        | %d      | %-20s| %-15f| %-15f        \n", i - 3 * (n - 1) + 1, course[i].evaluation_name, course[i].evaluation_percentage, course[i].evaluation_fullmark);
+				printf("        | %d      | %-20s| %-15f| %-15f        \n", i - 3 * (n - 1) + 1, details[i].evaluation_name, details[i].evaluation_percentage, details[i].evaluation_fullmark);
 			}
 			FILE* fpgrade;
 			fpgrade = fopen("CourseGrade.txt","r");
@@ -892,4 +900,37 @@ int expected4()//3子菜单
 		expected3(expect, assignments, labs, in_class_exercises, projects, final, percentage);
 	}
     return 0;
+}
+
+void ViewCourse()
+{
+	ReadCourse();
+	ReadCourseDetails();
+	printf("\nThere're totally %d courses recorded:\n\n", CourseCount);
+	test();
+    printf("Enter a number to view the related course details or enter any other number back: ");
+    int answer5;
+	scanf("%d", &answer5);
+	if (answer5 < 1 || answer5 > CourseCount)
+	{
+		return;
+	}
+	else
+	{
+		for (int n = 1; n <= CourseCount; n++)
+	    {
+		if (answer5 == n)
+		   {
+			   printf("        %s %s\n", course[n - 1].code, course[n - 1].name);
+			   printf("        -----------------------------------\n");
+			   printf("        | No.    | Item                | Percentage     | Full Mark    | Grades\n");
+			   int i = 0;
+			   for (i = 3 * (n - 1); i < 3 * n; i++)
+			   {
+			      printf("        | %d      | %-20s| %-15f| %-15f         \n", i - 3 * (n - 1) + 1, details[i].evaluation_name, details[i].evaluation_percentage, details[i].evaluation_fullmark);
+			   }  
+			   printf("        -----------------------------------\n");
+		   }
+		}   
+	}
 }
